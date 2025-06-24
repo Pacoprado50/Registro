@@ -1,0 +1,486 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Citas - Triada</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+    <!-- Estilos CSS -->
+    <style>
+        body {
+            background-color: #fdfaf6;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .form-label { color: #374151; }
+        .form-input, .form-select { background-color: #ffffff; border-color: #D1D5DB; }
+        .btn-primary { background-color: #819a8b; color: white; transition: background-color 0.3s; }
+        .btn-primary:hover { background-color: #6b8275; }
+        .header-bg { background-color: #819a8b; }
+        
+        /* Ocultar secciones por defecto */
+        #login-section, #dashboard-section { display: none; }
+        
+        /* Estilos para el placeholder de fecha */
+        input[type="date"]:not(:focus):in-range::-webkit-datetime-edit-year-field,
+        input[type="date"]:not(:focus):in-range::-webkit-datetime-edit-month-field,
+        input[type="date"]:not(:focus):in-range::-webkit-datetime-edit-day-field {
+            color: transparent;
+        }
+    </style>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="text-gray-800">
+
+    <!-- SECCIÓN DE REGISTRO DE PACIENTES (Página Principal) -->
+    <div id="registration-section">
+        <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+            <header class="text-center mb-8">
+                <img src="https://storage.googleapis.com/gemini-prod-us-east1-9515/uploads/2024/6/22/0c00ffc2e08a6b47c050df006d997235/Logo_Triada.png" alt="Logo Triada" class="mx-auto mb-4 w-48 h-auto">
+                <h1 class="text-3xl sm:text-4xl font-bold" style="color: #6b8275;">Registro de Pacientes</h1>
+            </header>
+            <main>
+                <form id="patient-form" class="space-y-6 bg-white p-6 sm:p-8 rounded-xl shadow-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="fullName" class="block text-sm font-medium form-label">Nombre y primer apellido</label>
+                            <input type="text" id="fullName" name="fullName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm form-input">
+                        </div>
+                        <div>
+                            <label for="phone" class="block text-sm font-medium form-label">Teléfono</label>
+                            <input type="tel" id="phone" name="phone" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm form-input">
+                        </div>
+                         <div>
+                            <label for="email" class="block text-sm font-medium form-label">Email</label>
+                            <input type="email" id="email" name="email" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm form-input">
+                        </div>
+                         <div>
+                            <label for="age" class="block text-sm font-medium form-label">Edad</label>
+                            <input type="number" id="age" name="age" required min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm form-input">
+                        </div>
+                    </div>
+                    <fieldset>
+                        <legend class="text-sm font-medium form-label">El masaje será en</legend>
+                        <div class="mt-2 space-y-2 sm:space-y-0 sm:flex sm:items-center sm:space-x-10">
+                            <div class="flex items-center"><input id="service-cabin" name="serviceType" type="radio" value="Cabina" required class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"><label for="service-cabin" class="ml-3 block text-sm font-medium text-gray-700">Cabina</label></div>
+                            <div class="flex items-center"><input id="service-home" name="serviceType" type="radio" value="Domicilio" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"><label for="service-home" class="ml-3 block text-sm font-medium text-gray-700">Domicilio</label></div>
+                        </div>
+                    </fieldset>
+                    <div><label for="colonia" class="block text-sm font-medium form-label">Colonia</label><input type="text" id="colonia" name="colonia" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm form-input"></div>
+                    <div><label for="duration" class="block text-sm font-medium form-label">Duración del masaje (minutos)</label><input type="number" id="duration" name="duration" required min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm form-input"></div>
+                    <div><label for="ailment" class="block text-sm font-medium form-label">Dolencia o situación a mejorar</label><textarea id="ailment" name="ailment" rows="3" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm form-input"></textarea></div>
+                    <div><label for="massageType" class="block text-sm font-medium form-label">Tipo de masaje</label><select id="massageType" name="massageType" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm form-select"><option value="" disabled selected>Selecciona una opción</option><option value="Por tiempo">Por tiempo</option><option value="Relajante">Relajante</option><option value="Sueco">Sueco</option><option value="Ayurveda">Ayurveda</option><option value="Quiromasaje">Quiromasaje</option><option value="Shiatsu">Shiatsu</option><option value="Reductivo">Reductivo</option><option value="Sotai">Sotai</option><option value="Craneo Facial o Champi">Craneo Facial o Champi</option></select></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div><label for="massageDate" class="block text-sm font-medium form-label">Fecha del masaje</label><input type="date" id="massageDate" name="massageDate" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm form-input"></div>
+                        <div><label for="startTime" class="block text-sm font-medium form-label">Hora inicial (24h)</label><input type="time" id="startTime" name="startTime" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm form-input"></div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div><label for="deposit" class="block text-sm font-medium form-label">Anticipo ($)</label><input type="number" id="deposit" name="deposit" required min="0" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm form-input"></div>
+                        <div><label for="bank" class="block text-sm font-medium form-label">Banco de transferencia</label><input type="text" id="bank" name="bank" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm form-input"></div>
+                    </div>
+                    <fieldset class="space-y-4">
+                        <div class="relative flex items-start"><div class="flex items-center h-5"><input id="terms" name="terms" type="checkbox" required class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"></div><div class="ml-3 text-sm"><label for="terms" class="font-medium text-gray-700">Estoy de acuerdo</label><p class="text-gray-500">He leído la información previa y políticas del servicio, y acepto lo que se establece.</p></div></div>
+                    </fieldset>
+                    <div><button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium btn-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Registrar Cita</button></div>
+                </form>
+            </main>
+            <footer class="text-center mt-8">
+                <a href="#" id="admin-link" class="text-sm text-gray-500 hover:text-gray-800">Admin Login</a>
+            </footer>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DE LOGIN DE ADMINISTRADOR -->
+    <div id="login-section" class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
+            <header class="text-center">
+                <img src="https://storage.googleapis.com/gemini-prod-us-east1-9515/uploads/2024/6/22/0c00ffc2e08a6b47c050df006d997235/Logo_Triada.png" alt="Logo Triada" class="mx-auto mb-4 w-40 h-auto">
+                <h1 class="text-2xl font-bold text-center" style="color: #6b8275;">Acceso de Administrador</h1>
+            </header>
+            <form id="login-form" class="mt-8 space-y-6">
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div><label for="username" class="sr-only">Usuario</label><input id="username" name="username" type="text" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Usuario"></div>
+                    <div><label for="password" class="sr-only">Contraseña</label><input id="password" name="password" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Contraseña"></div>
+                </div>
+                <p id="error-message" class="text-red-500 text-sm text-center hidden">Usuario o contraseña incorrectos.</p>
+                <div><button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md btn-primary">Iniciar Sesión</button></div>
+                 <button type="button" id="back-to-form-link" class="mt-4 w-full text-center text-sm text-gray-600 hover:text-black">Volver al formulario</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DEL PANEL DE ADMINISTRACIÓN -->
+    <div id="dashboard-section">
+        <header class="header-bg shadow text-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                <h1 class="text-xl sm:text-2xl font-bold">Panel de Administración</h1>
+                <button id="logout-btn" class="bg-white text-gray-800 hover:bg-gray-200 font-bold py-2 px-4 rounded-md text-sm">Cerrar Sesión</button>
+            </div>
+        </header>
+        <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+            <!-- Estadísticas -->
+            <section id="stats-section" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-xl shadow-lg text-center"><p class="text-sm font-medium text-gray-500">Citas Totales</p><p id="stats-total" class="text-3xl font-bold" style="color:#6b8275;">0</p></div>
+                <div class="bg-white p-4 rounded-xl shadow-lg text-center"><p class="text-sm font-medium text-gray-500">Citas para Hoy</p><p id="stats-today" class="text-3xl font-bold" style="color:#6b8275;">0</p></div>
+                <div class="bg-white p-4 rounded-xl shadow-lg text-center"><p class="text-sm font-medium text-gray-500">Próximas Citas</p><p id="stats-upcoming" class="text-3xl font-bold" style="color:#6b8275;">0</p></div>
+            </section>
+            
+            <!-- Configuración -->
+            <section id="config-section" class="bg-white p-4 rounded-xl shadow-lg mb-6">
+                <h2 class="text-lg font-bold mb-3">Configuración de EmailJS</h2>
+                 <div id="config-alert-success" class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+                    <p class="font-bold">Guardado</p>
+                    <p>La configuración de EmailJS se ha guardado correctamente.</p>
+                </div>
+                <form id="config-form" class="space-y-4">
+                    <p class="text-sm text-gray-600">Ingresa tus credenciales de EmailJS aquí. Se guardarán en tu navegador.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label for="config-service-id" class="block text-sm font-medium">Service ID</label><input type="text" id="config-service-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm" value="service_h3q0oes" readonly></div>
+                        <div><label for="config-template-id" class="block text-sm font-medium">Template ID</label><input type="text" id="config-template-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm" value="template_sas8f8v" readonly></div>
+                        <div><label for="config-public-key" class="block text-sm font-medium">Public Key</label><input type="text" id="config-public-key" required placeholder="Tu Public Key aquí" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"></div>
+                    </div>
+                    <div><button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium btn-primary">Guardar Configuración</button></div>
+                </form>
+            </section>
+
+            <!-- Filtros -->
+            <section class="bg-white p-4 rounded-xl shadow-lg mb-6 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <div class="w-full sm:w-auto"><label for="date-filter" class="block text-sm font-medium text-gray-700">Filtrar por fecha:</label><input type="date" id="date-filter" class="mt-1 block w-full sm:w-auto rounded-md border-gray-300 shadow-sm"></div>
+                <div class="w-full sm:w-auto"><label for="type-filter" class="block text-sm font-medium text-gray-700">Filtrar por tipo:</label><select id="type-filter" class="mt-1 block w-full sm:w-auto rounded-md border-gray-300 shadow-sm"><option value="all">Todos los tipos</option><option value="Por tiempo">Por tiempo</option><option value="Relajante">Relajante</option><option value="Sueco">Sueco</option><option value="Ayurveda">Ayurveda</option><option value="Quiromasaje">Quiromasaje</option><option value="Shiatsu">Shiatsu</option><option value="Reductivo">Reductivo</option><option value="Sotai">Sotai</option><option value="Craneo Facial o Champi">Craneo Facial o Champi</option></select></div>
+                <button id="clear-filters" class="w-full sm:w-auto px-4 py-2 border rounded-md text-sm">Limpiar Filtros</button>
+            </section>
+
+            <!-- Tabla de Citas -->
+            <div class="overflow-x-auto bg-white rounded-xl shadow-lg"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha / Hora</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contacto</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo Masaje</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detalles</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th></tr></thead><tbody id="appointments-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div>
+        </main>
+    </div>
+
+    <!-- Modal de Éxito para Formulario -->
+    <div id="success-modal" style="display: none;" class="fixed z-10 inset-0 overflow-y-auto"><div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"><div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div><span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span><div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"><div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4"><div class="sm:flex sm:items-start"><div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10"><svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div><div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left"><h3 class="text-lg leading-6 font-medium text-gray-900">¡Registro Exitoso!</h3><div class="mt-2"><p class="text-sm text-gray-500">Tu cita ha sido registrada y notificada. Nos pondremos en contacto contigo para confirmar.</p></div></div></div></div><div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"><button type="button" id="close-modal-btn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 btn-primary text-base font-medium sm:ml-3 sm:w-auto sm:text-sm">Cerrar</button></div></div></div></div>
+
+    <!-- Lógica JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- CONSTANTES Y CONFIGURACIÓN ---
+        const ADMIN_USER = 'admin';
+        const ADMIN_PASS = 'triada2024'; // Puedes cambiar esta contraseña
+
+        // Claves para el almacenamiento local
+        const APPOINTMENTS_KEY = 'triadaAppointments';
+        const EMAILJS_CONFIG_KEY = 'triadaEmailJSConfig';
+
+        // --- ELEMENTOS DEL DOM ---
+        const sections = {
+            registration: document.getElementById('registration-section'),
+            login: document.getElementById('login-section'),
+            dashboard: document.getElementById('dashboard-section'),
+        };
+        
+        // Formulario de Registro
+        const patientForm = document.getElementById('patient-form');
+        const successModal = document.getElementById('success-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        
+        // Login
+        const loginForm = document.getElementById('login-form');
+        const errorMessage = document.getElementById('error-message');
+        const adminLink = document.getElementById('admin-link');
+        const backToFormLink = document.getElementById('back-to-form-link');
+
+        // Dashboard
+        const logoutBtn = document.getElementById('logout-btn');
+        const tableBody = document.getElementById('appointments-table-body');
+        const dateFilter = document.getElementById('date-filter');
+        const typeFilter = document.getElementById('type-filter');
+        const clearFiltersBtn = document.getElementById('clear-filters');
+        
+        // Dashboard - Estadísticas
+        const statsTotal = document.getElementById('stats-total');
+        const statsToday = document.getElementById('stats-today');
+        const statsUpcoming = document.getElementById('stats-upcoming');
+
+        // Dashboard - Configuración
+        const configForm = document.getElementById('config-form');
+        const configServiceIdInput = document.getElementById('config-service-id');
+        const configTemplateIdInput = document.getElementById('config-template-id');
+        const configPublicKeyInput = document.getElementById('config-public-key');
+        const configAlertSuccess = document.getElementById('config-alert-success');
+
+
+        // --- FUNCIONES DE NAVEGACIÓN Y ESTADO ---
+
+        const showSection = (sectionName) => {
+            Object.values(sections).forEach(section => section.style.display = 'none');
+            sections[sectionName].style.display = 'block';
+        };
+
+        const checkInitialState = () => {
+            loadEmailJSConfig(); // Cargar config de EmailJS al inicio
+            if (sessionStorage.getItem('isAdminAuthenticated') === 'true') {
+                showSection('dashboard');
+                loadDashboard();
+            } else {
+                showSection('registration');
+            }
+        };
+
+
+        // --- LÓGICA DE LOGIN ---
+
+        adminLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('login');
+        });
+        
+        backToFormLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('registration');
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = loginForm.username.value;
+            const password = loginForm.password.value;
+
+            if (username === ADMIN_USER && password === ADMIN_PASS) {
+                sessionStorage.setItem('isAdminAuthenticated', 'true');
+                errorMessage.classList.add('hidden');
+                loginForm.reset();
+                showSection('dashboard');
+                loadDashboard();
+            } else {
+                errorMessage.classList.remove('hidden');
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('isAdminAuthenticated');
+            showSection('login');
+        });
+
+
+        // --- LÓGICA DE REGISTRO DE PACIENTES ---
+        
+        const calculateEndTime = (startTime, durationInMinutes) => {
+            const [hours, minutes] = startTime.split(':').map(Number);
+            const date = new Date();
+            date.setHours(hours, minutes, 0, 0);
+            date.setMinutes(date.getMinutes() + durationInMinutes);
+            return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        };
+
+        patientForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = patientForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Registrando...';
+
+            // 1. Verificar configuración de EmailJS
+            const emailConfig = getEmailJSConfig();
+            if (!emailConfig.publicKey) {
+                alert('Error: La configuración de EmailJS no está completa en el panel de administración. No se pueden enviar notificaciones.');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Registrar Cita';
+                return;
+            }
+
+            // 2. Recopilar datos y preparar para EmailJS
+            const formData = new FormData(patientForm);
+            const data = Object.fromEntries(formData.entries());
+            const duration = parseInt(data.duration, 10);
+            
+            const templateParams = {
+                // Mapear campos del formulario a variables de la plantilla de EmailJS
+                patientName: data.fullName,
+                phone: data.phone,
+                email: data.email,
+                age: data.age,
+                appointmentDate: new Date(data.massageDate).toLocaleDateString('es-MX'),
+                appointmentTime: data.startTime,
+                appointmentType: data.massageType,
+                symptoms: data.ailment,
+                serviceType: data.serviceType,
+                colonia: data.colonia
+            };
+            
+            try {
+                // 3. Enviar correo con EmailJS
+                await emailjs.send(emailConfig.serviceId, emailConfig.templateId, templateParams);
+
+                // 4. Guardar cita en localStorage
+                const appointments = getAppointments();
+                const newAppointment = {
+                    id: Date.now().toString(),
+                    ...data,
+                    duration,
+                    horaFin: calculateEndTime(data.startTime, duration),
+                    anticipo: parseFloat(data.deposit),
+                    fechaCaptura: new Date().toISOString()
+                };
+                appointments.push(newAppointment);
+                saveAppointments(appointments);
+
+                // 5. Mostrar modal de éxito
+                successModal.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error al enviar el email o guardar la cita:', error);
+                alert(`Ocurrió un error. Por favor, inténtalo de nuevo.\nDetalles del error: ${error.text || error.message}`);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Registrar Cita';
+            }
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            successModal.style.display = 'none';
+            patientForm.reset();
+        });
+
+
+        // --- LÓGICA DEL PANEL DE ADMINISTRACIÓN ---
+
+        const getAppointments = () => JSON.parse(localStorage.getItem(APPOINTMENTS_KEY)) || [];
+        const saveAppointments = (appointments) => localStorage.setItem(APPOINTMENTS_KEY, JSON.stringify(appointments));
+
+        const getEmailJSConfig = () => JSON.parse(localStorage.getItem(EMAILJS_CONFIG_KEY)) || {
+            serviceId: 'service_h3q0oes',
+            templateId: 'template_sas8f8v',
+            publicKey: ''
+        };
+        const saveEmailJSConfig = (config) => localStorage.setItem(EMAILJS_CONFIG_KEY, JSON.stringify(config));
+
+        const loadEmailJSConfig = () => {
+            const config = getEmailJSConfig();
+            configServiceIdInput.value = config.serviceId;
+            configTemplateIdInput.value = config.templateId;
+            configPublicKeyInput.value = config.publicKey;
+            if(config.publicKey) {
+                emailjs.init({ publicKey: config.publicKey });
+            }
+        };
+        
+        configForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const config = {
+                serviceId: configServiceIdInput.value,
+                templateId: configTemplateIdInput.value,
+                publicKey: configPublicKeyInput.value.trim()
+            };
+            saveEmailJSConfig(config);
+            loadEmailJSConfig(); // Re-inicializar con la nueva clave
+            configAlertSuccess.classList.remove('hidden');
+            setTimeout(() => configAlertSuccess.classList.add('hidden'), 3000);
+        });
+
+        const formatDate = (dateString) => {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString + 'T00:00:00'); // Asegurar que se interprete como local
+            return date.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        };
+
+        const renderAppointments = (appointments) => {
+            tableBody.innerHTML = '';
+            if (appointments.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-6 text-gray-500">No hay citas para mostrar.</td></tr>`;
+                return;
+            }
+            
+            // Ordenar citas por fecha y hora
+            appointments.sort((a,b) => new Date(`${a.massageDate}T${a.startTime}`) - new Date(`${b.massageDate}T${b.startTime}`));
+
+            appointments.forEach(appt => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-50";
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        ${formatDate(appt.massageDate)}<br>${appt.startTime} - ${appt.horaFin}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${appt.fullName}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${appt.phone}<br>${appt.email}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${appt.massageType}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">
+                        <p><strong>Lugar:</strong> ${appt.serviceType} (${appt.colonia})</p>
+                        <p><strong>Dolencia:</strong> ${appt.ailment}</p>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                        <button data-id="${appt.id}" class="delete-btn text-red-600 hover:text-red-900">Eliminar</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        };
+        
+        const updateStatistics = (appointments) => {
+            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            
+            statsTotal.textContent = appointments.length;
+            statsToday.textContent = appointments.filter(a => a.massageDate === today).length;
+            statsUpcoming.textContent = appointments.filter(a => new Date(`${a.massageDate}T${a.startTime}`) >= now).length;
+        };
+
+        const applyFilters = () => {
+            let appointments = getAppointments();
+            const dateValue = dateFilter.value;
+            const typeValue = typeFilter.value;
+            
+            if (dateValue) {
+                appointments = appointments.filter(a => a.massageDate === dateValue);
+            }
+            if (typeValue !== 'all') {
+                appointments = appointments.filter(a => a.massageType === typeValue);
+            }
+            
+            renderAppointments(appointments);
+        };
+        
+        const loadDashboard = () => {
+            const appointments = getAppointments();
+            renderAppointments(appointments);
+            updateStatistics(appointments);
+        };
+
+        // Event listeners del Dashboard
+        dateFilter.addEventListener('change', applyFilters);
+        typeFilter.addEventListener('change', applyFilters);
+
+        clearFiltersBtn.addEventListener('click', () => {
+            dateFilter.value = '';
+            typeFilter.value = 'all';
+            loadDashboard();
+        });
+        
+        tableBody.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                const idToDelete = e.target.dataset.id;
+                if (confirm('¿Estás seguro de que quieres eliminar esta cita? Esta acción no se puede deshacer.')) {
+                    let appointments = getAppointments();
+                    appointments = appointments.filter(a => a.id !== idToDelete);
+                    saveAppointments(appointments);
+                    loadDashboard(); // Recargar y re-renderizar
+                }
+            }
+        });
+
+        // --- INICIALIZACIÓN ---
+        checkInitialState();
+    });
+    </script>
+</body>
+</html>
