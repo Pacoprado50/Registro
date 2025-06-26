@@ -258,7 +258,8 @@
                 phone: data.phone,
                 email: data.email,
                 age: data.age,
-                appointmentDate: new Date(data.massageDate).toLocaleDateString('es-MX'),
+                // ** LÍNEA CORREGIDA PARA EL ERROR DE FECHA **
+                appointmentDate: new Date(data.massageDate + 'T00:00:00').toLocaleDateString('es-MX', {day: '2-digit', month: '2-digit', year: 'numeric'}),
                 appointmentTime: data.startTime,
                 appointmentType: data.massageType,
                 symptoms: data.ailment,
@@ -370,19 +371,16 @@
             });
         };
         
-        // --- FUNCIÓN DE ESTADÍSTICAS CORREGIDA ---
         const updateStatistics = (appointments) => {
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Normaliza la fecha de hoy al inicio del día.
+            today.setHours(0, 0, 0, 0); 
 
             const todayISO = today.toISOString().split('T')[0];
 
             statsTotal.textContent = appointments.length;
             statsToday.textContent = appointments.filter(a => a.massageDate === todayISO).length;
             
-            // **LÓGICA CORREGIDA:** Filtra solo las citas que son estrictamente para fechas futuras (a partir de mañana).
             statsUpcoming.textContent = appointments.filter(a => {
-                // Se añade T00:00:00 para evitar problemas de zona horaria y comparar solo las fechas.
                 const apptDate = new Date(a.massageDate + 'T00:00:00');
                 return apptDate > today;
             }).length;
