@@ -253,7 +253,6 @@
             const data = Object.fromEntries(formData.entries());
             const duration = parseInt(data.duration, 10);
             
-            // **PARÁMETROS PARA EMAILJS CORREGIDOS Y COMPLETOS**
             const templateParams = {
                 patientName: data.fullName,
                 phone: data.phone,
@@ -265,7 +264,7 @@
                 symptoms: data.ailment,
                 serviceType: data.serviceType,
                 colonia: data.colonia,
-                duration: data.duration, // <-- CORREGIDO Y AÑADIDO
+                duration: data.duration,
                 depositAmount: data.deposit,
                 bankName: data.bank
             };
@@ -316,7 +315,6 @@
             configServiceIdInput.value = config.serviceId;
             configTemplateIdInput.value = config.templateId;
             configPublicKeyInput.value = config.publicKey;
-            // No inicializar aquí, se pasa la clave en cada envío para más seguridad
         };
         
         configForm.addEventListener('submit', (e) => {
@@ -372,13 +370,22 @@
             });
         };
         
+        // --- FUNCIÓN DE ESTADÍSTICAS CORREGIDA ---
         const updateStatistics = (appointments) => {
-            const today = new Date().toISOString().split('T')[0];
-            const now = new Date();
-            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normaliza la fecha de hoy al inicio del día.
+
+            const todayISO = today.toISOString().split('T')[0];
+
             statsTotal.textContent = appointments.length;
-            statsToday.textContent = appointments.filter(a => a.massageDate === today).length;
-            statsUpcoming.textContent = appointments.filter(a => new Date(`${a.massageDate}T${a.startTime}`) >= now).length;
+            statsToday.textContent = appointments.filter(a => a.massageDate === todayISO).length;
+            
+            // **LÓGICA CORREGIDA:** Filtra solo las citas que son estrictamente para fechas futuras (a partir de mañana).
+            statsUpcoming.textContent = appointments.filter(a => {
+                // Se añade T00:00:00 para evitar problemas de zona horaria y comparar solo las fechas.
+                const apptDate = new Date(a.massageDate + 'T00:00:00');
+                return apptDate > today;
+            }).length;
         };
 
         const applyFilters = () => {
