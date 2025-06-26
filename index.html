@@ -46,7 +46,6 @@
     <div id="registration-section">
         <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
             <header class="text-center mb-8">
-                <!-- LOGO CORREGIDO PARA LEER DESDE GITHUB -->
                 <img src="Logo Triada.png" alt="Logo Triada" class="mx-auto mb-4 w-48 h-auto">
                 <h1 class="text-3xl sm:text-4xl font-bold" style="color: #6b8275;">Registro de Pacientes</h1>
             </header>
@@ -93,7 +92,6 @@
     <div id="login-section" class="flex items-center justify-center min-h-screen">
         <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
             <header class="text-center">
-                <!-- LOGO CORREGIDO PARA LEER DESDE GITHUB -->
                 <img src="Logo Triada.png" alt="Logo Triada" class="mx-auto mb-4 w-40 h-auto">
                 <h1 class="text-2xl font-bold text-center" style="color: #6b8275;">Acceso de Administrador</h1>
             </header>
@@ -255,7 +253,7 @@
             const data = Object.fromEntries(formData.entries());
             const duration = parseInt(data.duration, 10);
             
-            // **PARÁMETROS PARA EMAILJS CORREGIDOS**
+            // **PARÁMETROS PARA EMAILJS CORREGIDOS Y COMPLETOS**
             const templateParams = {
                 patientName: data.fullName,
                 phone: data.phone,
@@ -267,12 +265,13 @@
                 symptoms: data.ailment,
                 serviceType: data.serviceType,
                 colonia: data.colonia,
-                depositAmount: data.deposit, // <-- Corregido
-                bankName: data.bank        // <-- Corregido
+                duration: data.duration, // <-- CORREGIDO Y AÑADIDO
+                depositAmount: data.deposit,
+                bankName: data.bank
             };
             
             try {
-                await emailjs.send(emailConfig.serviceId, emailConfig.templateId, templateParams);
+                await emailjs.send(emailConfig.serviceId, emailConfig.templateId, templateParams, emailConfig.publicKey);
 
                 const appointments = getAppointments();
                 const newAppointment = {
@@ -317,9 +316,7 @@
             configServiceIdInput.value = config.serviceId;
             configTemplateIdInput.value = config.templateId;
             configPublicKeyInput.value = config.publicKey;
-            if(config.publicKey) {
-                emailjs.init({ publicKey: config.publicKey });
-            }
+            // No inicializar aquí, se pasa la clave en cada envío para más seguridad
         };
         
         configForm.addEventListener('submit', (e) => {
