@@ -34,6 +34,13 @@
         input[type="date"]:not(:focus):in-range::-webkit-datetime-edit-day-field {
             color: transparent;
         }
+
+        /* Asegurar que el logo se vea correctamente */
+        .logo-triada {
+            max-width: 200px;
+            height: auto;
+            object-fit: contain;
+        }
     </style>
     
     <!-- Google Fonts: Inter -->
@@ -48,8 +55,16 @@
     <div id="registration-section">
         <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
             <header class="text-center mb-8">
-                <!-- LOGO CORREGIDO CON ENLACE DIRECTO -->
-                <img src="https://storage.googleapis.com/gemini-prod-us-east1-9515/uploads/2024/6/22/0c00ffc2e08a6b47c050df006d997235/Logo_Triada.png" alt="Logo Triada" class="mx-auto mb-4 w-48 h-auto">
+                <!-- LOGO con fallback y mejor handling -->
+                <div class="flex justify-center mb-4">
+                    <img src="https://storage.googleapis.com/gemini-prod-us-east1-9515/uploads/2024/6/22/0c00ffc2e08a6b47c050df006d997235/Logo_Triada.png" 
+                         alt="Logo Triada" 
+                         class="logo-triada"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display: none; width: 200px; height: 100px; background-color: #819a8b; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 8px;">
+                        TRIADA
+                    </div>
+                </div>
                 <h1 class="text-3xl sm:text-4xl font-bold" style="color: #6b8275;">Registro de Pacientes</h1>
             </header>
             <main>
@@ -107,8 +122,16 @@
     <div id="login-section" class="flex items-center justify-center min-h-screen">
         <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
             <header class="text-center">
-                <!-- LOGO CORREGIDO CON ENLACE DIRECTO -->
-                <img src="https://storage.googleapis.com/gemini-prod-us-east1-9515/uploads/2024/6/22/0c00ffc2e08a6b47c050df006d997235/Logo_Triada.png" alt="Logo Triada" class="mx-auto mb-4 w-40 h-auto">
+                <!-- LOGO con fallback -->
+                <div class="flex justify-center mb-4">
+                    <img src="https://storage.googleapis.com/gemini-prod-us-east1-9515/uploads/2024/6/22/0c00ffc2e08a6b47c050df006d997235/Logo_Triada.png" 
+                         alt="Logo Triada" 
+                         class="w-40 h-auto"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display: none; width: 160px; height: 80px; background-color: #819a8b; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 8px;">
+                        TRIADA
+                    </div>
+                </div>
                 <h1 class="text-2xl font-bold text-center" style="color: #6b8275;">Acceso de Administrador</h1>
             </header>
             <form id="login-form" class="mt-8 space-y-6">
@@ -315,7 +338,11 @@
                 appointmentType: data.massageType,
                 symptoms: data.ailment,
                 serviceType: data.serviceType,
-                colonia: data.colonia
+                colonia: data.colonia,
+                // AGREGADOS: Los campos que faltaban
+                deposit: data.deposit,
+                bank: data.bank,
+                duration: data.duration
             };
             
             try {
@@ -329,160 +356,3 @@
                     ...data,
                     duration,
                     horaFin: calculateEndTime(data.startTime, duration),
-                    anticipo: parseFloat(data.deposit),
-                    fechaCaptura: new Date().toISOString()
-                };
-                appointments.push(newAppointment);
-                saveAppointments(appointments);
-
-                // 5. Mostrar modal de éxito
-                successModal.style.display = 'block';
-
-            } catch (error) {
-                console.error('Error al enviar el email o guardar la cita:', error);
-                alert(`Ocurrió un error. Por favor, inténtalo de nuevo.\nDetalles del error: ${error.text || error.message}`);
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Registrar Cita';
-            }
-        });
-
-        closeModalBtn.addEventListener('click', () => {
-            successModal.style.display = 'none';
-            patientForm.reset();
-        });
-
-
-        // --- LÓGICA DEL PANEL DE ADMINISTRACIÓN ---
-
-        const getAppointments = () => JSON.parse(localStorage.getItem(APPOINTMENTS_KEY)) || [];
-        const saveAppointments = (appointments) => localStorage.setItem(APPOINTMENTS_KEY, JSON.stringify(appointments));
-
-        const getEmailJSConfig = () => JSON.parse(localStorage.getItem(EMAILJS_CONFIG_KEY)) || {
-            serviceId: 'service_h3q0oes',
-            templateId: 'template_sas8f8v',
-            publicKey: ''
-        };
-        const saveEmailJSConfig = (config) => localStorage.setItem(EMAILJS_CONFIG_KEY, JSON.stringify(config));
-
-        const loadEmailJSConfig = () => {
-            const config = getEmailJSConfig();
-            configServiceIdInput.value = config.serviceId;
-            configTemplateIdInput.value = config.templateId;
-            configPublicKeyInput.value = config.publicKey;
-            if(config.publicKey) {
-                emailjs.init({ publicKey: config.publicKey });
-            }
-        };
-        
-        configForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const config = {
-                serviceId: configServiceIdInput.value,
-                templateId: configTemplateIdInput.value,
-                publicKey: configPublicKeyInput.value.trim()
-            };
-            saveEmailJSConfig(config);
-            loadEmailJSConfig(); // Re-inicializar con la nueva clave
-            configAlertSuccess.classList.remove('hidden');
-            setTimeout(() => configAlertSuccess.classList.add('hidden'), 3000);
-        });
-
-        const formatDate = (dateString) => {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString + 'T00:00:00'); // Asegurar que se interprete como local
-            return date.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        };
-
-        const renderAppointments = (appointments) => {
-            tableBody.innerHTML = '';
-            if (appointments.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-6 text-gray-500">No hay citas para mostrar.</td></tr>`;
-                return;
-            }
-            
-            // Ordenar citas por fecha y hora
-            appointments.sort((a,b) => new Date(`${a.massageDate}T${a.startTime}`) - new Date(`${b.massageDate}T${b.startTime}`));
-
-            appointments.forEach(appt => {
-                const row = document.createElement('tr');
-                row.className = "hover:bg-gray-50";
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        ${formatDate(appt.massageDate)}<br>${appt.startTime} - ${appt.horaFin}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${appt.fullName}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${appt.phone}<br>${appt.email}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${appt.massageType}</td>
-                    <td class="px-6 py-4 text-sm text-gray-500">
-                        <p><strong>Lugar:</strong> ${appt.serviceType} (${appt.colonia})</p>
-                        <p><strong>Dolencia:</strong> ${appt.ailment}</p>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
-                        <button data-id="${appt.id}" class="delete-btn text-red-600 hover:text-red-900">Eliminar</button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        };
-        
-        const updateStatistics = (appointments) => {
-            const today = new Date().toISOString().split('T')[0];
-            const now = new Date();
-            
-            statsTotal.textContent = appointments.length;
-            statsToday.textContent = appointments.filter(a => a.massageDate === today).length;
-            statsUpcoming.textContent = appointments.filter(a => new Date(`${a.massageDate}T${a.startTime}`) >= now).length;
-        };
-
-        const applyFilters = () => {
-            let appointments = getAppointments();
-            const dateValue = dateFilter.value;
-            const typeValue = typeFilter.value;
-            
-            if (dateValue) {
-                appointments = appointments.filter(a => a.massageDate === dateValue);
-            }
-            if (typeValue !== 'all') {
-                appointments = appointments.filter(a => a.massageType === typeValue);
-            }
-            
-            renderAppointments(appointments);
-        };
-        
-        const loadDashboard = () => {
-            const appointments = getAppointments();
-            renderAppointments(appointments);
-            updateStatistics(appointments);
-        };
-
-        // Event listeners del Dashboard
-        dateFilter.addEventListener('change', applyFilters);
-        typeFilter.addEventListener('change', applyFilters);
-
-        clearFiltersBtn.addEventListener('click', () => {
-            dateFilter.value = '';
-            typeFilter.value = 'all';
-            loadDashboard();
-        });
-        
-        tableBody.addEventListener('click', (e) => {
-            if (e.target.classList.contains('delete-btn')) {
-                const idToDelete = e.target.dataset.id;
-                if (confirm('¿Estás seguro de que quieres eliminar esta cita? Esta acción no se puede deshacer.')) {
-                    let appointments = getAppointments();
-                    appointments = appointments.filter(a => a.id !== idToDelete);
-                    saveAppointments(appointments);
-                    loadDashboard(); // Recargar y re-renderizar
-                }
-            }
-        });
-
-        // --- INICIALIZACIÓN ---
-        checkInitialState();
-    });
-    </script>
-</body>
-</html>
